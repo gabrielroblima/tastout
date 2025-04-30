@@ -16,3 +16,8 @@ Best tatoo should be spread ASCII,
 others are more related to debug.
 Spread means bit of byte are spread on less significant bit.
 
+# development
+
+currently dev. branch are:
+- for ASCII in head/tail, [dev_text](https://gitlab.in2p3.fr/Ganil-acq/Embedded/REActif/REAction/tastout/-/tree/dev_text)
+- for BIN   in head/tail, [dev_cpp](https://gitlab.in2p3.fr/Ganil-acq/Embedded/REActif/REAction/tastout/-/tree/dev_cpp)
