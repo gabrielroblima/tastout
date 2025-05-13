@@ -4,7 +4,7 @@
 
 int main (int argc, char** argv)
 {
-	Tastout tastout("TAsToutT08b4i", true);
+	Tastout tastout("TAsTout", true);
 	
 	std::string signal("1632641282565121024204840968192");
 	std::vector<unsigned char> value = {0x08, 0xAB, 0xCD, 0xEF};

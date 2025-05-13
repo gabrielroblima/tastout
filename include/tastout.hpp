@@ -44,12 +44,12 @@ public:
 			std::ostringstream tastoutStream;
 			//! Tattoos the signal concatenating the magic number and information
 			tastoutStream << magicNumber_ << "T08b" << std::hex << value.size() << "i";
-			std::cout << tastoutStream.str() << std::endl;
 			for(int i = 0; i < value.size(); i++)
 			{
 				tastoutStream << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(value[i]);
 			}
-			std::cout << std::hex << tastoutStream.str() << std::endl;
+			
+			tattooedSignal = tastoutStream.str() + signal.substr(0, signal.size() - tastoutStream.str().size());
 		}else
 		{
 			//~ //! Reverse magic number
