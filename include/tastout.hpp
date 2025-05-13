@@ -10,9 +10,8 @@
 #include <sstream>
 #include <cstdlib>
 
-//Should we work with different types to tattoo or we work with a string to be tattooed?
-//For the last bit change option, should we receive a string or a vector to work with?
-//	  Will we send all the bytes and a header or the header will also be included as part of tattoo? 
+#define VERSION_TASTOUT "v0.0.1" 
+
 class Tastout
 {
 
@@ -24,6 +23,12 @@ public:
 	 * \param [in] isTattooInHead define if tattoo is in head(true) or in tail(false)
 	 **/
 	 Tastout(const std::string & magicNumber, const bool & isTattooInHead = false) : magicNumber_(magicNumber), isTattooInHead_(isTattooInHead){}
+	 
+	 //! Constructor
+	/**
+	 * \param [in] isTattooInHead define if tattoo is in head(true) or in tail(false)
+	 **/
+	 Tastout(const bool & isTattooInHead = false) : magicNumber_("TAsTout"), isTattooInHead_(isTattooInHead){}
 	 
 	 //! Write function tattoos the signal output type char should be considered as int8
 	 /**
@@ -65,10 +70,11 @@ public:
 	 //! Read function get data tattooed into string type char should be considered as int8
 	 /**
 	  * \param [in] tattooedSignal input signal
-	  * \param [in] values vector of values tattooed
+	  * \param [out] values vector of values tattooed
 	  **/
 	 char read(std::string & tattooedSignal, std::vector<unsigned char> & values)
 	 {
+		//! Create a reverse version of the magic number
 		std::string reverseMagicNumber(magicNumber_);
 		reverse(reverseMagicNumber.begin(), reverseMagicNumber.end());
 	
@@ -80,7 +86,7 @@ public:
 		}else if(tattooedSignal.find(reverseMagicNumber) != tattooedSignal.npos)
 		{
 			wasTattooFound = true;
-			//! Reverse tattoo if the magic number is reversed
+			//! Reverse tattoo
 			reverse(tattooedSignal.begin(), tattooedSignal.end());
 		}
 		
@@ -110,8 +116,8 @@ public:
 	 }	 
  private:
  
-	const std::string magicNumber_;
-	const bool isTattooInHead_;
+	const std::string magicNumber_; //! save magic number
+	const bool isTattooInHead_; //! allow to choose between tattoo in head or tail 
 };
 
 
