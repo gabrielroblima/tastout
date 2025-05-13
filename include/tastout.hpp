@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <cstdlib>
@@ -38,35 +39,28 @@ public:
 		
 		//! Stream to send number of values
 		//! T08 + b|B + (0~F) + i		
-				
+		std::ostringstream tastoutStream;
+		
+		//! Tattoos the signal concatenating the magic number and values
+		tastoutStream << magicNumber_ << "T08b" << std::hex << value.size() << "i";
+		for(int i = 0; i < value.size(); i++){tastoutStream << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(value[i]);}		
+
 		if(isTattooInHead_)
-		{
-			std::ostringstream tastoutStream;
-			//! Tattoos the signal concatenating the magic number and information
-			tastoutStream << magicNumber_ << "T08b" << std::hex << value.size() << "i";
-			for(int i = 0; i < value.size(); i++)
-			{
-				tastoutStream << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(value[i]);
-			}
-			
+		{			
+			//! Concatenate the first digits of signal with tastout
 			tattooedSignal = tastoutStream.str() + signal.substr(0, signal.size() - tastoutStream.str().size());
 		}else
 		{
-			//~ //! Reverse magic number
-			//~ std::string reverseMagicNumber(magicNumber_);
-			//~ reverse(reverseMagicNumber.begin(),reverseMagicNumber.end());
+			//! Reverse the magic number and data
+			std::string tastoutString(tastoutStream.str());
+			reverse(tastoutString.begin(), tastoutString.end());
 			
-			//~ //! Reverse value
-			//~ std::string reverseValue(value);
-			//~ reverse(reverseValue.begin(),reverseValue.end());
-			
-			//~ //! Tattoos the signal concatenating the most significatives digits of signal, the reversed value and and the reversed magic number
-			//~ tattooedSignal = signal.substr(0, signal.size() - (value.size() + magicNumber_.size())) + reverseValue + reverseMagicNumber;
+			tattooedSignal = signal.substr(0, signal.size() - tastoutStream.str().size()) + tastoutString;
 		}//isTattooInHead
 		return 0;
 	 }
 	 
-	 char read(const std::string & tattooedSignal, std::string & value)
+	 char read(const std::string & tattooedSignal, std::vector<unsigned char> & value)
 	 {
 		//~ std::string reverseMagicNumber(magicNumber_);
 		//~ reverse(reverseMagicNumber.begin(), reverseMagicNumber.end());
