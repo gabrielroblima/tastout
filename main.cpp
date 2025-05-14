@@ -6,8 +6,8 @@
 
 #define VERSION "v0.0.1"
 
-typedef uint8_t Tammo;
-typedef uint16_t Ttarget;
+typedef uint32_t Tammo;
+typedef uint32_t Ttarget;
 
 #define AMMO_SIZE 10
 #define TARGET_SIZE 1000
