@@ -6,11 +6,11 @@
 
 #define VERSION "v0.0.1"
 
-typedef uint32_t Tammo;
-typedef uint32_t Ttarget;
+typedef unsigned long long Tammo;
+typedef unsigned long long Ttarget;
 
 #define AMMO_SIZE 10
-#define TARGET_SIZE 1000
+#define TARGET_SIZE 1500
 
 int main(int argc, char** argv)
 {
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	
 	
 	
-	if(not tastout.write(target, 1000, ammo, AMMO_SIZE, true));	
+	if(not tastout.write(target, TARGET_SIZE, ammo, AMMO_SIZE, true)) return EXIT_FAILURE;	
 	
 	for(size_t i = 0; i < TARGET_SIZE; i++)
 	{

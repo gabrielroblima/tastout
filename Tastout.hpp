@@ -64,15 +64,16 @@ public:
 		}
 		
 		#if DEBUG
-			DEBUG_MSG("Required data size: " + std::to_string(8*tastoutStream_.str().size()))
-		#endif
-		
-		#if DEBUG
 			DEBUG_MSG(tastoutStream_.str())	
 		#endif
 		
 		//Verify if target data is capable of storing all ammo data
 		size_t neededTargetDataSize = 8*tastoutStream_.str().size();
+		
+		#if DEBUG
+			DEBUG_MSG("Required data size: " + std::to_string(neededTargetDataSize))
+		#endif
+		
 		if(sizeOfTargetData < neededTargetDataSize) return false;
 		
 		//!														|>Represents 1 Tammo |>Represents 1 Tammo
@@ -82,6 +83,7 @@ public:
 		//! Creates 1 bitset of 8b*sizeof(Tammo)B bits
 		std::bitset<8> source;
 		
+		//! Tattoo string bytes into targetSource
 		for(size_t i = 0; i < neededTargetDataSize; i+= 8)
 		{
 			source ^= source;
