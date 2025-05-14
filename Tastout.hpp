@@ -6,13 +6,15 @@
 #include <sstream>
 #include <iomanip>
 #include <bitset>
+#include <vector>
+#include <cstring>
 
 #define TASTOUT_VERSION "v0.0.1"
 
 //-------DEBUG-------
-#define DEBUG 0
+#define DEBUG 1
 #define DEBUG_MSG(msg) \
-    std::cout << "\033[34m" << (msg) << "\033[0m" << std::endl;
+    std::cout << "\033[34m" << msg << "\033[0m" << std::endl;
 
 template<typename Ttarget, typename Tammo>
 class Tastout
@@ -41,7 +43,7 @@ public:
 	 * \param ammoData
 	 * \param sizeOfAmmoData
 	 **/
-	const bool write(const Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData, const bool & isBigEndian)
+	const bool write(Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData, const bool & isBigEndian)
 	{	
 		#if DEBUG
 			DEBUG_MSG(className_)	
@@ -53,7 +55,7 @@ public:
 		tastoutStream_ << std::hex << std::setfill('0') << std::setw(2) << 8*sizeof(Tammo);
 		if(isBigEndian) tastoutStream_ << 'B'; else tastoutStream_ << 'b';
 		tastoutStream_ << std::hex << std::setfill('0') << std::setw(2) << sizeOfAmmoData << 'i'; 
-		//For instance the type integer was used but after it'll be possible to choose dataType
+		//For this moment the type integer was used but after it'll be possible to choose dataType
 		
 		//Add ammo data to tastoutStream in hex
 		for(size_t i = 0; i < sizeOfAmmoData; i++)
@@ -65,17 +67,33 @@ public:
 			DEBUG_MSG("Required data size: " + std::to_string(8*tastoutStream_.str().size()))
 		#endif
 		
-		//Verify if target data is capable of storing all ammo data
-		if(sizeOfTargetData < 8*tastoutStream_.str().size()) return false;
-		
-		for(size_t i = 0; i < tastoutStream_.str().size(); i+= sizeof(Ttarget)*8*sizeof(Tammo))
-		{
-			
-		}
-		
 		#if DEBUG
 			DEBUG_MSG(tastoutStream_.str())	
 		#endif
+		
+		//Verify if target data is capable of storing all ammo data
+		size_t neededTargetDataSize = 8*tastoutStream_.str().size();
+		if(sizeOfTargetData < neededTargetDataSize) return false;
+		
+		//!														|>Represents 1 Tammo |>Represents 1 Tammo
+		//! To write 1 Tammo in n Ttarget we need a bitset with 8b*sizeof(Ttarget)B * 8b*sizeof(Tammo)B bits
+		std::bitset<8*sizeof(Ttarget)> destination;
+		
+		//! Creates 1 bitset of 8b*sizeof(Tammo)B bits
+		std::bitset<8> source;
+		
+		for(size_t i = 0; i < neededTargetDataSize; i+= 8)
+		{
+			source ^= source;
+			source |= tastoutStream_.str()[i/8];
+			for(size_t j = 0; j < 8; j++)
+			{
+				destination ^= destination; // Garants destination is clear
+				destination |= targetData[i+j]; // Copy target to destination
+				destination[0] = source[7-j]; // Sets last significant bit of current destination to source[j]
+				targetData[i+j] = destination.to_ulong();
+			}
+		} 
 		
 		return true;
 	}

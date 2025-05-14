@@ -7,19 +7,22 @@
 #define VERSION "v0.0.1"
 
 typedef uint8_t Tammo;
-typedef uint8_t Ttarget;
+typedef uint16_t Ttarget;
 
+#define AMMO_SIZE 10
+#define TARGET_SIZE 1000
 
 int main(int argc, char** argv)
 {
 	//! Instance of Tastout class with tastout in head
-	Tastout<Tammo, Ttarget> tastout(true);
+	Tastout<Ttarget, Tammo> tastout(true);
 	
-	Ttarget target[1000]; // Target data => It will be tattooed
-	for(size_t i = 0; i < 1000; i++){target[i] = rand() & 0xFF;} // fills target random with values between 0 and 255;
+	Ttarget target[TARGET_SIZE]; // Target data => It will be tattooed
+	for(size_t i = 0; i < TARGET_SIZE; i++){target[i] = rand() & 0xFF;} // fills target random with values between 0 and 255;
 	
-	Tammo ammo[10]; //Ammo data =>	It's the tattoo of target
-	for(size_t i = 0; i < 10; i++)
+	
+	Tammo ammo[AMMO_SIZE]; //Ammo data =>	It's the tattoo of target
+	for(size_t i = 0; i < AMMO_SIZE; i++)
 	{
 		ammo[i] = rand() & 0xFF;
 		std::cout << std::dec << i << ' ';
@@ -29,7 +32,12 @@ int main(int argc, char** argv)
 	
 	
 	
-	if(not tastout.write(target, 1000, ammo, 10, true));	
+	if(not tastout.write(target, 1000, ammo, AMMO_SIZE, true));	
 	
+	for(size_t i = 0; i < TARGET_SIZE; i++)
+	{
+		std::bitset<8*sizeof(Ttarget)> output(target[i]);
+		std::cout << output << std::endl;
+	}
 	return EXIT_SUCCESS;
 }

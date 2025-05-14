@@ -6,7 +6,7 @@ bin:
 	$(CXX) main.cpp -o $(BIN)
 
 run: 
-	./$(BIN)
+	./$(BIN) > tastout.output
 	
 clean:
-	rm $(BIN)
+	rm $(BIN) tastout.output
