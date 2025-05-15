@@ -14,7 +14,7 @@
 //-------DEBUG-------
 #define DEBUG 1
 #define DEBUG_MSG(msg) \
-    std::cout << "\033[34m" << msg << "\033[0m" << std::endl;
+    std::cout << "\033[34m [DEBUG]" << msg << "\033[0m" << std::endl;
 
 template<typename Ttarget, typename Tammo>
 class Tastout
@@ -102,7 +102,7 @@ public:
 		return true;
 	}//write
 	
-	const bool read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, const Tammo* receivedData, const size_t & sizeOfReceivedData)
+	const bool read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, Tammo* receivedData, size_t & sizeOfReceivedData)
 	{
 		#if DEBUG
 			DEBUG_MSG(className_)	
@@ -119,8 +119,6 @@ public:
 		//! Try to indentify magic number in head we add 7 do the magic number size to read the bytes of information
 		for(size_t i = 0; i < 8*(magicNumber_.size()+7); i+= 8)
 		{
-			byte ^= byte;
-			byte |= magicNumber_[i/8];
 			for(size_t j = 0; j < 8; j++)
 			{
 				readTattooed ^= readTattooed; //Clears readTattooed
@@ -130,15 +128,44 @@ public:
 			informationRead = informationRead + static_cast<char>(byte.to_ulong());	
 		}
 		
+		//! Verify if magic number is present
 		if(informationRead.substr(0, magicNumber_.size()) != magicNumber_) return false; // failed to identify magic number
 		
+		//! Gets information about number of bits and number of elements received
+		size_t receivedNumberOfBits = std::stoi(informationRead.substr(magicNumber_.size()+1,2), nullptr, 16);
+		sizeOfReceivedData = std::stoi(informationRead.substr(magicNumber_.size()+4,2), nullptr, 16);
 		
+		if(8*sizeof(Tammo) != receivedNumberOfBits) return false; //incorrect size for integers;
+		
+		std::bitset<8*sizeof(Tammo)> readData; // Alocates a bitset to store temporary received data
+		
+		//! Allocates memory to store received data.
+		receivedDataVector.reserve(sizeOfReceivedData);
+		receivedDataVector.resize(sizeOfReceivedData); 
+		
+		//! Fills data with 
+		for(size_t i = 20; i < receivedNumberOfBits*sizeOfReceivedData; i+= receivedNumberOfBits)
+		{
+			for(size_t j = 0; j < receivedNumberOfBits; j++)
+			{
+				readTattooed ^= readTattooed; //Clears readTattooed
+				readTattooed = tattooedData[i+j];
+				readData[receivedNumberOfBits-1-j] = readTattooed[0];
+			}
+			receivedDataVector[(i-20)/receivedNumberOfBits] = readData.to_ulong();			
+		}
+		
+		receivedData = receivedDataVector.data();	
 		
 		
 		#if DEBUG
+			DEBUG_MSG("Received number of bits:")
+			DEBUG_MSG(receivedNumberOfBits)
+			DEBUG_MSG("Elements of received data:")
+			DEBUG_MSG(sizeOfReceivedData)
+			DEBUG_MSG("Received tastout header:")
 			DEBUG_MSG(informationRead);
 		#endif
-		
 		
 		return true;
 		
@@ -151,6 +178,7 @@ private:
 	const bool isTattooInHead_;
 	std::stringstream tastoutStream_;
 	std::string className_;
+	std::vector<Tammo> receivedDataVector;
 	
 };
 #endif

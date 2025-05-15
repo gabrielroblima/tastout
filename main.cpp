@@ -34,15 +34,16 @@ int main(int argc, char** argv)
 	
 	if(not tastout.write(target, TARGET_SIZE, ammo, AMMO_SIZE, true)) return EXIT_FAILURE;	
 	
-	//~ for(size_t i = 0; i < TARGET_SIZE; i++)
-	//~ {
-		//~ std::bitset<8*sizeof(Ttarget)> output(target[i]);
-		//~ std::cout << output << std::endl;
-	//~ }
+	Tammo* received;
+	size_t received_size;
 	
-	Tammo received[AMMO_SIZE];
+	tastout.read(target, TARGET_SIZE, received, received_size);
+	for(size_t i = 0; i < received_size; i++)
+	{
+		std::cout << std::dec << i << ' ';
+		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(received[i]) << ' ';
+		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(received[i]) << std::endl;
+	} // Output received values from tattoo;
 	
-	
-	tastout.read(target, TARGET_SIZE, received, AMMO_SIZE);
 	return EXIT_SUCCESS;
 }
