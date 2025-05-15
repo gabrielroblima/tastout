@@ -10,7 +10,7 @@ typedef uint8_t Tammo;
 typedef uint8_t Ttarget;
 
 #define AMMO_SIZE 10
-#define TARGET_SIZE 320
+#define TARGET_SIZE 1500
 
 int main(int argc, char** argv)
 {
@@ -20,7 +20,15 @@ int main(int argc, char** argv)
 	Ttarget target[TARGET_SIZE]; // Target data => It will be tattooed
 	for(size_t i = 0; i < TARGET_SIZE; i++){target[i] = rand() & 0xFF;} // fills target random with values between 0 and 255;
 	
+	std::cout << "Target data: " << std::endl;
+	for(size_t i = 0; i < AMMO_SIZE; i++)
+	{
+		std::cout << std::dec << i << ' ';
+		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(target[i]) << ' ';
+		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(target[i]) << std::endl;
+	} // fills ammo with random values between 0 and 255 and show values in hex and dec;
 	
+	std::cout << "Sent Data: " << std::endl;
 	Tammo ammo[AMMO_SIZE]; //Ammo data =>	It's the tattoo of target
 	for(size_t i = 0; i < AMMO_SIZE; i++)
 	{
@@ -30,14 +38,21 @@ int main(int argc, char** argv)
 		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(ammo[i]) << std::endl;
 	} // fills ammo with random values between 0 and 255 and show values in hex and dec;
 	
+	if(not tastout.write(target, TARGET_SIZE, ammo, AMMO_SIZE, true)) return EXIT_FAILURE;
 	
+	std::cout << "Tattooed data: " << std::endl;
+	for(size_t i = 0; i < AMMO_SIZE; i++)
+	{
+		std::cout << std::dec << i << ' ';
+		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(target[i]) << ' ';
+		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(target[i]) << std::endl;
+	} // fills ammo with random values between 0 and 255 and show values in hex and dec;	
 	
-	if(not tastout.write(target, TARGET_SIZE, ammo, AMMO_SIZE, true)) return EXIT_FAILURE;	
-	
-	Tammo* received;
+	std::vector<Tammo> received(20);
 	size_t received_size;
 	
-	tastout.read(target, TARGET_SIZE, received, received_size);
+	tastout.read(target, TARGET_SIZE, received.data(), received_size);
+	std::cout << "Received Data: " << std::endl;
 	for(size_t i = 0; i < received_size; i++)
 	{
 		std::cout << std::dec << i << ' ';

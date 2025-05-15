@@ -78,8 +78,9 @@ public:
 		
 		if(sizeOfTargetData < neededTargetDataSize) return false;
 		
+		// change comment
 		//!														|>Represents 1 Tammo |>Represents 1 Tammo
-		//! To write 1 Tammo in n Ttarget we need a bitset with 8b*sizeof(Ttarget)B * 8b*sizeof(Tammo)B bits
+		//! To write 1 Tammo in n Ttarget we need a bitset with 8b*sizeof(Ttarget)B * 8b*sizeof(Tammo)B bits 
 		std::bitset<8*sizeof(Ttarget)> destination;
 		
 		//! Creates 1 bitset of 8b*sizeof(Tammo)B bits
@@ -137,26 +138,9 @@ public:
 		
 		if(8*sizeof(Tammo) != receivedNumberOfBits) return false; //incorrect size for integers;
 		
-		std::bitset<8*sizeof(Tammo)> readData; // Alocates a bitset to store temporary received data
-		
 		//! Allocates memory to store received data.
 		receivedDataVector.reserve(sizeOfReceivedData);
 		receivedDataVector.resize(sizeOfReceivedData); 
-		
-		//! Fills data with 
-		for(size_t i = 20; i < receivedNumberOfBits*sizeOfReceivedData; i+= receivedNumberOfBits)
-		{
-			for(size_t j = 0; j < receivedNumberOfBits; j++)
-			{
-				readTattooed ^= readTattooed; //Clears readTattooed
-				readTattooed = tattooedData[i+j];
-				readData[receivedNumberOfBits-1-j] = readTattooed[0];
-			}
-			receivedDataVector[(i-20)/receivedNumberOfBits] = readData.to_ulong();			
-		}
-		
-		receivedData = receivedDataVector.data();	
-		
 		
 		#if DEBUG
 			DEBUG_MSG("Received number of bits:")
@@ -166,6 +150,36 @@ public:
 			DEBUG_MSG("Received tastout header:")
 			DEBUG_MSG(informationRead);
 		#endif
+		
+		//! Continues to Read data 
+		std::string dataString("");
+		for(size_t i = 8*(magicNumber_.size()+7); i < 160 + 8*(receivedNumberOfBits/4)*sizeOfReceivedData; i+= 8)
+		{
+			byte ^= byte;
+			for(size_t j = 0; j < 8; j++)
+			{
+				readTattooed ^= readTattooed; //Clears readTattooed
+				readTattooed = tattooedData[i+j];
+				byte[7-j] = readTattooed[0];
+				
+			}
+			dataString = dataString + static_cast<char>(byte.to_ulong());	
+		}
+		
+		//! Converts all received data from string int values
+		for(size_t i = 0; i < dataString.size(); i+=receivedNumberOfBits/4)
+		{
+			receivedDataVector[i/(receivedNumberOfBits/4)] = std::stoi(dataString.substr(i,receivedNumberOfBits/4), nullptr, 16);
+			#if DEBUG
+				DEBUG_MSG("Received data: ")
+				std::stringstream ss;
+				ss << std::to_string(receivedDataVector[i/(receivedNumberOfBits/4)]);
+				DEBUG_MSG(ss.str())
+			#endif
+		}
+		
+		//! Copy value 
+		memcpy(receivedData, receivedDataVector.data(), receivedDataVector.size()*sizeof(Tammo));
 		
 		return true;
 		
