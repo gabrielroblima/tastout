@@ -3,7 +3,7 @@ BIN = tastout
 all: bin run
 
 bin:
-	$(CXX) main.cpp -o $(BIN)
+	$(CXX) -std=c++17 main.cpp -o $(BIN)
 
 run: 
 	./$(BIN) > tastout.output

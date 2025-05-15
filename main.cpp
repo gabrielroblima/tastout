@@ -6,11 +6,11 @@
 
 #define VERSION "v0.0.1"
 
-typedef unsigned long long Tammo;
-typedef unsigned long long Ttarget;
+typedef uint8_t Tammo;
+typedef uint8_t Ttarget;
 
 #define AMMO_SIZE 10
-#define TARGET_SIZE 1500
+#define TARGET_SIZE 320
 
 int main(int argc, char** argv)
 {
@@ -34,10 +34,15 @@ int main(int argc, char** argv)
 	
 	if(not tastout.write(target, TARGET_SIZE, ammo, AMMO_SIZE, true)) return EXIT_FAILURE;	
 	
-	for(size_t i = 0; i < TARGET_SIZE; i++)
-	{
-		std::bitset<8*sizeof(Ttarget)> output(target[i]);
-		std::cout << output << std::endl;
-	}
+	//~ for(size_t i = 0; i < TARGET_SIZE; i++)
+	//~ {
+		//~ std::bitset<8*sizeof(Ttarget)> output(target[i]);
+		//~ std::cout << output << std::endl;
+	//~ }
+	
+	Tammo received[AMMO_SIZE];
+	
+	
+	tastout.read(target, TARGET_SIZE, received, AMMO_SIZE);
 	return EXIT_SUCCESS;
 }

@@ -25,7 +25,7 @@ public:
 	 * \param [in] isTattooInHead defines if tattoing is in head (true) or in tail (false)
 	 **/
 	
-	Tastout(const bool & isTattooInHead) : magicNumber_("TAsTout"), isTattooInHead_(isTattooInHead), className_("--------------------Class::Tastout--------------------")
+	Tastout(const bool & isTattooInHead) : magicNumber_("TAsTout"), isTattooInHead_(isTattooInHead), className_("Class::Tastout")
 	{
 		//! Creates a reversed copy of magic number
 		magicNumber_ = magicNumber_ + TASTOUT_VERSION;
@@ -49,6 +49,8 @@ public:
 			DEBUG_MSG(className_)	
 		#endif
 		
+		//Clear stream content
+		tastoutStream_.str("");
 		//We are going to send all data in form of text i.e. ascii
 		tastoutStream_ << magicNumber_;
 		tastoutStream_ << 'T';
@@ -98,6 +100,48 @@ public:
 		} 
 		
 		return true;
+	}//write
+	
+	const bool read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, const Tammo* receivedData, const size_t & sizeOfReceivedData)
+	{
+		#if DEBUG
+			DEBUG_MSG(className_)	
+		#endif
+		
+		if(sizeOfTattooedData < magicNumber_.size()) return false; // Data size is not compatible
+		
+		//! Allocates 2 bitsets, one to read a tattooed data and another to register a byte.
+		std::bitset<8*sizeof(Ttarget)> readTattooed;
+		std::bitset<8> byte;
+		
+		std::string informationRead("");
+		
+		//! Try to indentify magic number in head we add 7 do the magic number size to read the bytes of information
+		for(size_t i = 0; i < 8*(magicNumber_.size()+7); i+= 8)
+		{
+			byte ^= byte;
+			byte |= magicNumber_[i/8];
+			for(size_t j = 0; j < 8; j++)
+			{
+				readTattooed ^= readTattooed; //Clears readTattooed
+				readTattooed = tattooedData[i+j];
+				byte[7-j] = readTattooed[0];
+			}
+			informationRead = informationRead + static_cast<char>(byte.to_ulong());	
+		}
+		
+		if(informationRead.substr(0, magicNumber_.size()) != magicNumber_) return false; // failed to identify magic number
+		
+		
+		
+		
+		#if DEBUG
+			DEBUG_MSG(informationRead);
+		#endif
+		
+		
+		return true;
+		
 	}
 
 private:
