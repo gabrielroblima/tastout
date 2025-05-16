@@ -13,7 +13,7 @@ make bin
 # Use
 
 ~~~ { .bash }
-./tastout
+make run
 ~~~
 
 # Example of output
