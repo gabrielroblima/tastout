@@ -1,9 +1,9 @@
 BIN = tastout
-
+FLAGS = -std=c++17 -lX11
 all: bin run
 
 bin:
-	$(CXX) -std=c++17 main.cpp -o $(BIN)
+	$(CXX) main.cpp -o $(BIN) $(FLAGS)
 
 run: 
 	./$(BIN) > tastout.output

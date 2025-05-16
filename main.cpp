@@ -1,103 +1,90 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 
 #include "Tastout.hpp"
+#include "../CImg/CImg.h"
 
 #define VERSION "v0.0.1"
 
-typedef uint8_t Tammo;
-typedef uint8_t Ttarget;
+typedef uint16_t dataType;
+typedef uint16_t CImg_t;
 
-#define AMMO_SIZE 10
-#define TARGET_SIZE 321
+#define MAX_SIZE 65535
 
 int main(int argc, char** argv)
 {
+	//command arguments, i.e. CLI option
+	cimg_usage(("Creates a graph, tattoos growing time, decay time, min and max values into this CImg Graph. The data is untattooed and info is displayed.\n" \
+			   "It uses different GNU libraries (see --info option)\n\n" \
+	           "usage: ./tastout -h -I\n" \
+			   "       ./tastout -n 16348 -g 8192 -l 2000 \n" \
+			   "\n version: "+std::string(VERSION)+"\n compilation date:" \
+    ).c_str());//cimg_usage
+    
+		const int samples = cimg_option("-n", 8192, "Number of points in graph");
+		const dataType growTime = cimg_option("-g", 4096, "Number of points of growing");
+		const dataType decayTime = cimg_option("-d", samples-growTime, "Number of points of growing");
+		const dataType maxValue = cimg_option("-h", 65535, "Max value of exponential");
+		const dataType minValue = cimg_option("-l", 0, "Minimal value of exponential");
+		const bool show = cimg_option("-s", true, "Minimal value of exponential");
+    
+	///standard options
+	const bool show_h = cimg_option("-h",    false,NULL);//-h hidden option
+    bool show_help=		cimg_option("--help",show_h,"help (or -h option)");show_help=show_h|show_help; //same --help or -h option
+	bool show_info= 	cimg_option("-I",false,NULL);//-I hidden option
+	if( cimg_option("--info",show_info,"show compilation options (or -I option)") ) {show_info=true;cimg_library::cimg::info();}//same --info or -I option
+	bool show_version=cimg_option("-v",false,NULL);//-v hidden option
+	if( cimg_option("--version",show_version,"show version (or -v option)") ) {show_version=true;std::cout<<VERSION<<std::endl;return 0;}//same --version or -v option
+	if(show_help) {/*print_help(std::cerr);*/return EXIT_SUCCESS;}
+	//}CLI option
 	
-	/**
-	 * This code is an example of Tastout. It firstly creates a table of random numbers to receive the tattoo and another one to be tattooed.
-	 * The data to be tattooed is called ammo and is displayed to the user. The target receives the tattoo and a comparison between tattooed and untattooed data is shown.
-	 * At the end, the recovered data read from target data is displayed, and a change comparison is made to guarantee that data changes were almost insignificant.
-	 **/
-	 
-	srand (time(NULL));
-	//! Instance of Tastout class with tastout in head
-	Tastout<Ttarget, Tammo> tastout;
+	//! Creates a Cimg object to save a physicalCurve, that's why it has only one dimension
+	cimg_library::CImg<CImg_t> physicalCurve(samples, 1, 1, 1, 0);
 	
-	
-	//! Target data => It will receive the tattoo
-	std::vector<Ttarget> target(TARGET_SIZE);
-	for(size_t i = 0; i < TARGET_SIZE; i++){target[i] = rand() & 0xFF;} // fills target random with values between 0 and 255;
-	
-	std::vector<Ttarget> unchangedTarget = target; // Copy of target vector to display before and after
-	
-	//!Ammo data =>	It will be tattooed
-	Tammo ammo[AMMO_SIZE]; 
-	for(size_t i = 0; i < AMMO_SIZE; i++){ammo[i] = rand() & 0xFF;}
-	
-	//! Calls tastout write
-	if(tastout.write(target.data(), TARGET_SIZE, ammo, AMMO_SIZE) != TASTOUT::SUCCESS) return EXIT_FAILURE;
-	
-	//! Display data block	
-	std::cout << "These datas were tattooed into target data: " << std::endl << std::endl;
-	
-	for(size_t i = 0; i < AMMO_SIZE; i++)
+	//! Fills physicalCurve with a peak curve. It grows until growTime and decays until the end of physicalCurve elements
+	cimg_forX(physicalCurve, x)
 	{
-		std::cout << std::dec << i << ' ';
-		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(ammo[i]) << ' ';
-		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(ammo[i]) << std::endl;
-	}
-	
-	std::bitset<8*sizeof(Ttarget)> outputByte;
-	std::bitset<8> tattooedByte;
-	std::cout << std::endl << std::endl << "----------------- Displaying Data -----------------" << std::endl;
-	size_t startData = 8*(tastout.getMagicNumber().size()+7); // Position of first element tattooed
-	
-	//! Displays data before and after tattoo
-	for(size_t i = startData; i < startData+AMMO_SIZE*8*sizeof(Tammo)*2; i+= 8)
-	{
-		std::cout << " Hex Target	Tattooed Target" << std::endl;
-		for(size_t j = 0; j < 8; j++)
+		if(x < growTime)
 		{
-			std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2*sizeof(Ttarget)) << static_cast<unsigned long long>(unchangedTarget[i+j]) << ' ';
-			outputByte = unchangedTarget[i+j];
-			std::cout << "0b" << outputByte << ' ';
-			outputByte = target[i+j];
-			tattooedByte[7-j] = outputByte[0];
-			std::cout << "0b" << outputByte << std::endl;
-			
-			if(j == 7)
-			{
-				std::cout << "---------------------------------------------------" << std::endl 
-						  << "Tattooed byte:  0b" << tattooedByte <<  " ASCII: " << static_cast<char>(tattooedByte.to_ulong()) << std::endl << std::endl;
-			}
-		}		
+			physicalCurve(x) = minValue + static_cast<CImg_t>(maxValue * exp(x-growTime));
+		}else
+		{
+			physicalCurve(x) = minValue + static_cast<CImg_t>(maxValue * exp(growTime-x));
+		}
 	}
-	
-	//! Calculates and display maximal target change
-	Ttarget max = 0, min = 0xFF;
-	for(size_t i = 0; i < TARGET_SIZE; i++)
-	{
-		if(abs(target[i] - unchangedTarget[i]) > max) max = abs(target[i] - unchangedTarget[i]);
-		if(abs(target[i] - unchangedTarget[i]) < min) min = abs(target[i] - unchangedTarget[i]);
-	}
-	
-	std::cout << "Max change in target data was: " << std::to_string(max) << std::endl << "Min change in target data was: " << std::to_string(min) << std::endl << std::endl;
-	
-	//! Reception of data from tattooed data
-	size_t received_size;
-	if(tastout.read(target.data(), TARGET_SIZE, received_size) != TASTOUT::SUCCESS) return EXIT_FAILURE;
-	const Tammo* received = tastout.getRead();
-	
-	std::cout << "These datas were read from tattooed target data: " << std::endl << std::endl;
-	for(size_t i = 0; i < received_size; i++)
-	{
-		std::cout << std::dec << i << ' ';
-		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(received[i]) << ' ';
-		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(received[i]) << std::endl;
-	}
-	
 
+	//! Data to be tattooed in graph
+	dataType physicalInfo[] = {growTime, decayTime, maxValue, minValue};
+	
+	Tastout<CImg_t, dataType> tastout;
+	
+	#if cimg_display
+	if(show)
+	{
+		physicalCurve.display_graph("Physical curve before tattoo");
+	}
+	#endif
+	
+	if(tastout.write(physicalCurve.data(), physicalCurve.size(), physicalInfo, 4) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	
+	#if cimg_display
+	if(show)
+	{
+		physicalCurve.display_graph("Physical curve after tattoo");
+	}
+	#endif
+	
+	size_t sizeOfReceivedData = 0;
+	if(tastout.read(physicalCurve.data(), physicalCurve.size(), sizeOfReceivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	
+	const dataType* receivedData = tastout.getRead();
+	
+	for(int i = 0; i < sizeOfReceivedData; i++)
+	{
+		std::cout << "Received info = " << receivedData[i] << std::endl;
+	}
+	
 	return EXIT_SUCCESS;
 }
