@@ -11,11 +11,6 @@
 
 #define TASTOUT_VERSION "v0.0.1"
 
-//!-------DEBUG-------
-#define DEBUG 0
-#define DEBUG_MSG(msg) \
-    std::cout << "\033[34m [DEBUG]" << msg << "\033[0m" << std::endl;
-
 enum class TASTOUT
 {
 	SUCCESS = 0,
@@ -50,12 +45,7 @@ public:
 	 * char output represents a uint8 value
 	 **/
 	const TASTOUT write(Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData)
-	{	
-		#if DEBUG
-			DEBUG_MSG(className_)
-			DEBUG_MSG("::write")	
-		#endif
-		
+	{			
 		//Clear stream content
 		tastoutStream_.str("");
 		//We are going to send all data in form of text i.e. ascii
@@ -72,16 +62,9 @@ public:
 			tastoutStream_ << std::hex << std::setfill('0') << std::setw(2*sizeof(Tammo)) << static_cast<unsigned long long int>(ammoData[i]);
 		}
 		
-		#if DEBUG
-			DEBUG_MSG(tastoutStream_.str())	
-		#endif
-		
 		//Verify if target data is capable of storing all ammo data
 		size_t neededTargetDataSize = 8*tastoutStream_.str().size();
 		
-		#if DEBUG
-			DEBUG_MSG("Required data size: " + std::to_string(neededTargetDataSize))
-		#endif
 		
 		if(sizeOfTargetData < neededTargetDataSize)
 		{
@@ -107,9 +90,6 @@ public:
 				targetData[i+j] = destination.to_ulong();
 			}
 		}
-		#if DEBUG
-			DEBUG_MSG("Tastout finished!")
-		#endif
 		 
 		return TASTOUT::SUCCESS;
 	}//write
@@ -122,10 +102,6 @@ public:
 	 **/
 	TASTOUT read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, size_t & sizeOfReceivedData)
 	{
-		#if DEBUG
-			DEBUG_MSG(className_)
-			DEBUG_MSG("::read")	
-		#endif
 		
 		if(sizeOfTattooedData < 8*magicNumber_.size())
 		{
@@ -171,15 +147,6 @@ public:
 		receivedDataVector.reserve(sizeOfReceivedData);
 		receivedDataVector.resize(sizeOfReceivedData); 
 		
-		#if DEBUG
-			DEBUG_MSG("Received number of bits:")
-			DEBUG_MSG(receivedNumberOfBits)
-			DEBUG_MSG("Elements of received data:")
-			DEBUG_MSG(sizeOfReceivedData)
-			DEBUG_MSG("Received tastout header:")
-			DEBUG_MSG(informationRead);
-		#endif
-		
 		//! Continues to Read data 
 		std::string dataString("");
 		for(size_t i = 8*(magicNumber_.size()+7); i < 160 + 8*(receivedNumberOfBits/4)*sizeOfReceivedData; i+= 8)
@@ -198,12 +165,6 @@ public:
 		for(size_t i = 0; i < dataString.size(); i+=receivedNumberOfBits/4)
 		{
 			receivedDataVector[i/(receivedNumberOfBits/4)] = std::stoi(dataString.substr(i,receivedNumberOfBits/4), nullptr, 16);
-			#if DEBUG
-				DEBUG_MSG("Received data: ")
-				std::stringstream ss;
-				ss << std::to_string(receivedDataVector[i/(receivedNumberOfBits/4)]);
-				DEBUG_MSG(ss.str())
-			#endif
 		}		
 		return TASTOUT::SUCCESS;
 	}
