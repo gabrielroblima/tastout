@@ -11,8 +11,8 @@
 
 #define TASTOUT_VERSION "v0.0.1"
 
-//-------DEBUG-------
-#define DEBUG 1
+//!-------DEBUG-------
+#define DEBUG 0
 #define DEBUG_MSG(msg) \
     std::cout << "\033[34m [DEBUG]" << msg << "\033[0m" << std::endl;
 
@@ -28,20 +28,18 @@ public:
 	Tastout(const bool & isTattooInHead) : magicNumber_("TAsTout"), isTattooInHead_(isTattooInHead), className_("Class::Tastout")
 	{
 		//! Creates a reversed copy of magic number
-		magicNumber_ = magicNumber_ + TASTOUT_VERSION;
-		reverseMagicNumber_ = magicNumber_;
-		reverse(reverseMagicNumber_.begin(), reverseMagicNumber_.end());
-		
+		magicNumber_ = magicNumber_ + TASTOUT_VERSION;		
 	}
 	
 	//! Magic number is based on version, so user can get magic number by this function
 	const std::string & getMagicNumber(){return magicNumber_;};
 	
 	/**
-	 * \param targetData 
-	 * \param sizeOfTargetData
-	 * \param ammoData
-	 * \param sizeOfAmmoData
+	 * \param targetData Pointer to data that will receive the tattoo 
+	 * \param sizeOfTargetData Number of elements of data that will receive the tattoo
+	 * \param ammoData Pointer to data that will be tattooed
+	 * \param sizeOfAmmoData Number of elements to be tattooed
+	 * \param isBigEndian Chooses between bigEndian and little endian
 	 **/
 	const bool write(Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData, const bool & isBigEndian)
 	{	
@@ -59,7 +57,7 @@ public:
 		tastoutStream_ << std::hex << std::setfill('0') << std::setw(2) << sizeOfAmmoData << 'i'; 
 		//For this moment the type integer was used but after it'll be possible to choose dataType
 		
-		//Add ammo data to tastoutStream in hex
+		//!Add ammo data to tastoutStream in hex
 		for(size_t i = 0; i < sizeOfAmmoData; i++)
 		{
 			tastoutStream_ << std::hex << std::setfill('0') << std::setw(2*sizeof(Tammo)) << static_cast<unsigned long long int>(ammoData[i]);
@@ -77,10 +75,9 @@ public:
 		#endif
 		
 		if(sizeOfTargetData < neededTargetDataSize) return false;
-		
-		// change comment
-		//!														|>Represents 1 Tammo |>Represents 1 Tammo
-		//! To write 1 Tammo in n Ttarget we need a bitset with 8b*sizeof(Ttarget)B * 8b*sizeof(Tammo)B bits 
+
+		//!														|>Represents 1 Tammo
+		//! To write 1 Tammo in n Ttarget we need a bitset with 8b*sizeof(Ttarget)B bits 
 		std::bitset<8*sizeof(Ttarget)> destination;
 		
 		//! Creates 1 bitset of 8b*sizeof(Tammo)B bits
@@ -103,7 +100,13 @@ public:
 		return true;
 	}//write
 	
-	const bool read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, Tammo* receivedData, size_t & sizeOfReceivedData)
+	/**
+	 * \param tattooedData Pointer to data that received the tattoo 
+	 * \param sizeOfTargetData Number of elements of tattooedData
+	 * \param receivedData Pointer to received data "vector"
+	 * \param sizeOfAmmoData Number of received elements
+	 **/
+	const bool read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, size_t & sizeOfReceivedData)
 	{
 		#if DEBUG
 			DEBUG_MSG(className_)	
@@ -176,19 +179,20 @@ public:
 				ss << std::to_string(receivedDataVector[i/(receivedNumberOfBits/4)]);
 				DEBUG_MSG(ss.str())
 			#endif
-		}
-		
-		//! Copy value 
-		memcpy(receivedData, receivedDataVector.data(), receivedDataVector.size()*sizeof(Tammo));
-		
+		}		
 		return true;
 		
+	}
+	
+	//! Returns pointer to receivedDataVector
+	Tammo* getRead()
+	{
+		return receivedDataVector.data();
 	}
 
 private:
 	
 	std::string magicNumber_;
-	std::string reverseMagicNumber_;
 	const bool isTattooInHead_;
 	std::stringstream tastoutStream_;
 	std::string className_;

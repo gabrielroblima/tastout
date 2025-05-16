@@ -10,55 +10,77 @@ typedef uint8_t Tammo;
 typedef uint8_t Ttarget;
 
 #define AMMO_SIZE 10
-#define TARGET_SIZE 1500
+#define TARGET_SIZE 320
 
 int main(int argc, char** argv)
 {
 	//! Instance of Tastout class with tastout in head
 	Tastout<Ttarget, Tammo> tastout(true);
 	
-	Ttarget target[TARGET_SIZE]; // Target data => It will be tattooed
+	//! Target data => It will receive the tattoo
+	std::vector<Ttarget> target(TARGET_SIZE);
 	for(size_t i = 0; i < TARGET_SIZE; i++){target[i] = rand() & 0xFF;} // fills target random with values between 0 and 255;
 	
-	std::cout << "Target data: " << std::endl;
-	for(size_t i = 0; i < AMMO_SIZE; i++)
-	{
-		std::cout << std::dec << i << ' ';
-		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(target[i]) << ' ';
-		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(target[i]) << std::endl;
-	} // fills ammo with random values between 0 and 255 and show values in hex and dec;
+	std::vector<Ttarget> unchangedTarget = target; // Copy of target vector to display before and after
 	
-	std::cout << "Sent Data: " << std::endl;
-	Tammo ammo[AMMO_SIZE]; //Ammo data =>	It's the tattoo of target
+	//!Ammo data =>	It will be tattooed
+	Tammo ammo[AMMO_SIZE]; 
+	for(size_t i = 0; i < AMMO_SIZE; i++){ammo[i] = rand() & 0xFF;}
+	
+	//! Calls tastout write
+	if(not tastout.write(target.data(), TARGET_SIZE, ammo, AMMO_SIZE, true)) return EXIT_FAILURE;
+	
+	//! Display data block	
+	std::cout << "This data was tattooed into target data: " << std::endl;
+	
 	for(size_t i = 0; i < AMMO_SIZE; i++)
 	{
-		ammo[i] = rand() & 0xFF;
 		std::cout << std::dec << i << ' ';
 		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(ammo[i]) << ' ';
 		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(ammo[i]) << std::endl;
-	} // fills ammo with random values between 0 and 255 and show values in hex and dec;
+	}
 	
-	if(not tastout.write(target, TARGET_SIZE, ammo, AMMO_SIZE, true)) return EXIT_FAILURE;
+	std::cout << "------------------------------------------------" << std::endl << std::endl;
 	
-	std::cout << "Tattooed data: " << std::endl;
-	for(size_t i = 0; i < AMMO_SIZE; i++)
+	std::bitset<8*sizeof(Ttarget)> outputByte;
+	std::bitset<8> tattooedByte;
+	std::cout << "--------------- Displaying Data ---------------" << std::endl;
+	size_t startData = 8*(tastout.getMagicNumber().size()+7); // Position of first element tattooed
+	std::cout << " Hex Target	Tattooed Target" << std::endl;
+	
+	//! Displays data before and after tattoo
+	for(size_t i = startData; i < startData+AMMO_SIZE*8*sizeof(Tammo)*2; i+= 8)
 	{
-		std::cout << std::dec << i << ' ';
-		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(target[i]) << ' ';
-		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(target[i]) << std::endl;
-	} // fills ammo with random values between 0 and 255 and show values in hex and dec;	
+		for(size_t j = 0; j < 8; j++)
+		{
+			std::cout << "0x" << std::hex << std::setfill('0') << std::setw(2*sizeof(Ttarget)) << static_cast<unsigned long long>(unchangedTarget[i+j]) << ' ';
+			outputByte = unchangedTarget[i+j];
+			std::cout << "0b" << outputByte << ' ';
+			outputByte = target[i+j];
+			tattooedByte[7-j] = outputByte[0];
+			std::cout << "0b" << outputByte << std::endl;
+			
+			if(j == 7)
+			{
+				std::cout << "---------------------------------------------------" << std::endl 
+						  << "Tattooed byte:  0b" << tattooedByte <<  " ASCII: " << static_cast<char>(tattooedByte.to_ulong()) << std::endl << std::endl;
+				std::cout << " Hex Target	Tattooed Target" << std::endl;
+			}
+		}		
+	}
 	
-	std::vector<Tammo> received(20);
+	//! Reception of data from tattooed data
 	size_t received_size;
+	tastout.read(target.data(), TARGET_SIZE, received_size);
+	Tammo* received;
+	received = tastout.getRead();
 	
-	tastout.read(target, TARGET_SIZE, received.data(), received_size);
-	std::cout << "Received Data: " << std::endl;
 	for(size_t i = 0; i < received_size; i++)
 	{
 		std::cout << std::dec << i << ' ';
 		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(received[i]) << ' ';
 		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(received[i]) << std::endl;
-	} // Output received values from tattoo;
-	
+	}
+
 	return EXIT_SUCCESS;
 }
