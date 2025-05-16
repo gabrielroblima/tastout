@@ -60,19 +60,24 @@ int main(int argc, char** argv)
 	
 	Tastout<CImg_t, dataType> tastout;
 	
-	#if cimg_display
-	if(show)
-	{
-		physicalCurve.display_graph("Physical curve before tattoo");
-	}
-	#endif
+	//! Saves curve before tattoo
+	cimg_library::CImgDisplay physicalCurveBefore;
+	physicalCurve._display_graph(physicalCurveBefore, "Physical curve before tattoo");
 	
 	if(tastout.write(physicalCurve.data(), physicalCurve.size(), physicalInfo, 4) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 	
+	//! Saves curve before tattoo
+	cimg_library::CImgDisplay physicalCurveAfter;
+	physicalCurve._display_graph(physicalCurveAfter, "Physical curve after tattoo");
+	
 	#if cimg_display
 	if(show)
 	{
-		physicalCurve.display_graph("Physical curve after tattoo");
+		while (!physicalCurveBefore.is_closed() || !physicalCurveAfter.is_closed())
+		{
+			physicalCurveBefore.wait(10);
+			physicalCurveAfter.wait(10);
+		}
 	}
 	#endif
 	
