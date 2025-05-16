@@ -7,6 +7,6 @@ bin:
 
 run: 
 	./$(BIN) > tastout.output
-	
+	cat tastout.output
 clean:
 	rm $(BIN) tastout.output

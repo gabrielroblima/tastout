@@ -16,18 +16,24 @@
 #define DEBUG_MSG(msg) \
     std::cout << "\033[34m [DEBUG]" << msg << "\033[0m" << std::endl;
 
+enum class TASTOUT
+{
+	SUCCESS = 0,
+	WRONG_SIZE,
+	MAGIC_NUMBER_IDENTIFICATION_FAILURE, 
+	WRONG_MAGIC_NUMBER_SIZE,
+	INCOMPATIBLE_TYPE_SIZE	
+};
+
 template<typename Ttarget, typename Tammo>
 class Tastout
 {
 public:
 	
-	/**
-	 * \param [in] isTattooInHead defines if tattoing is in head (true) or in tail (false)
-	 **/
-	
-	Tastout(const bool & isTattooInHead) : magicNumber_("TAsTout"), isTattooInHead_(isTattooInHead), className_("Class::Tastout")
+	//! Constructor
+	Tastout() : magicNumber_("TAsTout"), className_("Class::Tastout")
 	{
-		//! Creates a reversed copy of magic number
+		//! Creates a magic number with version number
 		magicNumber_ = magicNumber_ + TASTOUT_VERSION;		
 	}
 	
@@ -40,24 +46,27 @@ public:
 	 * \param ammoData Pointer to data that will be tattooed
 	 * \param sizeOfAmmoData Number of elements to be tattooed
 	 * \param isBigEndian Chooses between bigEndian and little endian
+	 * 
+	 * char output represents a uint8 value
 	 **/
-	const bool write(Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData, const bool & isBigEndian)
+	const TASTOUT write(Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData)
 	{	
 		#if DEBUG
-			DEBUG_MSG(className_)	
+			DEBUG_MSG(className_)
+			DEBUG_MSG("::write")	
 		#endif
 		
 		//Clear stream content
 		tastoutStream_.str("");
 		//We are going to send all data in form of text i.e. ascii
 		tastoutStream_ << magicNumber_;
-		tastoutStream_ << 'T';
-		tastoutStream_ << std::hex << std::setfill('0') << std::setw(2) << 8*sizeof(Tammo);
-		if(isBigEndian) tastoutStream_ << 'B'; else tastoutStream_ << 'b';
-		tastoutStream_ << std::hex << std::setfill('0') << std::setw(2) << sizeOfAmmoData << 'i'; 
+		tastoutStream_ << 'T'; //! Type text
+		tastoutStream_ << std::hex << std::setfill('0') << std::setw(2) << 8*sizeof(Tammo); //! Number of bits in tattooed data
+		tastoutStream_ << 'b';
+		tastoutStream_ << std::hex << std::setfill('0') << std::setw(2) << sizeOfAmmoData << 'i'; //! Number of elements to be tattooed
 		//For this moment the type integer was used but after it'll be possible to choose dataType
 		
-		//!Add ammo data to tastoutStream in hex
+		//!Add ammoData to tastoutStream in hex
 		for(size_t i = 0; i < sizeOfAmmoData; i++)
 		{
 			tastoutStream_ << std::hex << std::setfill('0') << std::setw(2*sizeof(Tammo)) << static_cast<unsigned long long int>(ammoData[i]);
@@ -74,7 +83,11 @@ public:
 			DEBUG_MSG("Required data size: " + std::to_string(neededTargetDataSize))
 		#endif
 		
-		if(sizeOfTargetData < neededTargetDataSize) return false;
+		if(sizeOfTargetData < neededTargetDataSize)
+		{
+			std::cerr << "tastout::write => size of target data should at least " << neededTargetDataSize << std::endl;
+			return TASTOUT::WRONG_SIZE;
+		}
 
 		//!														|>Represents 1 Tammo
 		//! To write 1 Tammo in n Ttarget we need a bitset with 8b*sizeof(Ttarget)B bits 
@@ -86,18 +99,19 @@ public:
 		//! Tattoo string bytes into targetSource
 		for(size_t i = 0; i < neededTargetDataSize; i+= 8)
 		{
-			source ^= source;
-			source |= tastoutStream_.str()[i/8];
+			source = tastoutStream_.str()[i/8];
 			for(size_t j = 0; j < 8; j++)
 			{
-				destination ^= destination; // Garants destination is clear
-				destination |= targetData[i+j]; // Copy target to destination
+				destination = targetData[i+j]; // Copy target to destination
 				destination[0] = source[7-j]; // Sets last significant bit of current destination to source[j]
 				targetData[i+j] = destination.to_ulong();
 			}
-		} 
-		
-		return true;
+		}
+		#if DEBUG
+			DEBUG_MSG("Tastout finished!")
+		#endif
+		 
+		return TASTOUT::SUCCESS;
 	}//write
 	
 	/**
@@ -106,14 +120,18 @@ public:
 	 * \param receivedData Pointer to received data "vector"
 	 * \param sizeOfAmmoData Number of received elements
 	 **/
-	const bool read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, size_t & sizeOfReceivedData)
+	TASTOUT read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, size_t & sizeOfReceivedData)
 	{
 		#if DEBUG
-			DEBUG_MSG(className_)	
+			DEBUG_MSG(className_)
+			DEBUG_MSG("::read")	
 		#endif
 		
-		if(sizeOfTattooedData < magicNumber_.size()) return false; // Data size is not compatible
-		
+		if(sizeOfTattooedData < 8*magicNumber_.size())
+		{
+			std::cerr << "tastout::read => Tattooed Dada size should be greater then " << 8*magicNumber_.size() << std::endl;
+			return TASTOUT::WRONG_MAGIC_NUMBER_SIZE; // Data size is not compatible
+		}
 		//! Allocates 2 bitsets, one to read a tattooed data and another to register a byte.
 		std::bitset<8*sizeof(Ttarget)> readTattooed;
 		std::bitset<8> byte;
@@ -125,7 +143,6 @@ public:
 		{
 			for(size_t j = 0; j < 8; j++)
 			{
-				readTattooed ^= readTattooed; //Clears readTattooed
 				readTattooed = tattooedData[i+j];
 				byte[7-j] = readTattooed[0];
 			}
@@ -133,13 +150,22 @@ public:
 		}
 		
 		//! Verify if magic number is present
-		if(informationRead.substr(0, magicNumber_.size()) != magicNumber_) return false; // failed to identify magic number
+		if(informationRead.substr(0, magicNumber_.size()) != magicNumber_)
+		{
+			std::cerr << "tastout::read => Failed to identify Magic Number" << std::endl; 
+			return TASTOUT::MAGIC_NUMBER_IDENTIFICATION_FAILURE;// failed to identify magic number
+		}
 		
 		//! Gets information about number of bits and number of elements received
 		size_t receivedNumberOfBits = std::stoi(informationRead.substr(magicNumber_.size()+1,2), nullptr, 16);
 		sizeOfReceivedData = std::stoi(informationRead.substr(magicNumber_.size()+4,2), nullptr, 16);
 		
-		if(8*sizeof(Tammo) != receivedNumberOfBits) return false; //incorrect size for integers;
+		if(8*sizeof(Tammo) != receivedNumberOfBits)
+		{
+			std::cerr << "tastout::read => Incompatible type sizes" << std::endl; 
+			return TASTOUT::INCOMPATIBLE_TYPE_SIZE; //incorrect size for integers;
+		}
+		
 		
 		//! Allocates memory to store received data.
 		receivedDataVector.reserve(sizeOfReceivedData);
@@ -161,7 +187,6 @@ public:
 			byte ^= byte;
 			for(size_t j = 0; j < 8; j++)
 			{
-				readTattooed ^= readTattooed; //Clears readTattooed
 				readTattooed = tattooedData[i+j];
 				byte[7-j] = readTattooed[0];
 				
@@ -180,23 +205,21 @@ public:
 				DEBUG_MSG(ss.str())
 			#endif
 		}		
-		return true;
-		
+		return TASTOUT::SUCCESS;
 	}
 	
 	//! Returns pointer to receivedDataVector
-	Tammo* getRead()
+	const Tammo* getRead()
 	{
 		return receivedDataVector.data();
 	}
 
 private:
 	
-	std::string magicNumber_;
-	const bool isTattooInHead_;
-	std::stringstream tastoutStream_;
-	std::string className_;
-	std::vector<Tammo> receivedDataVector;
+	std::string magicNumber_; //! MagicNumber => Includes Tastout version
+	std::stringstream tastoutStream_; //! Stream to be tattooed
+	std::string className_; //! Debug Info
+	std::vector<Tammo> receivedDataVector; //! Vector to store read data after execution of read method 
 	
 };
 #endif

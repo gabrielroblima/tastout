@@ -1,23 +1,17 @@
-signal tattooing to embedded information in a noisy digital signal.
+Signal tattooing to embedded information in a noisy digital signal.
 
-tattoo: `TAsToutB16b2f`
-signal: `1632641282565121024204840968192`
+Tattoo type: spread ASCII in head
 
-Tattoo type:
+In tattoo spread, a vector of data has its bits spread into a target vector of data. The target vector of data has only the least significant bit modified to guarantee that no important data is lost.
+Is recommended to use only integer data (8, 16, 32 or 64 bits);
 
-0. ASCII in head
-1. ASCII in tail (rev: `...tuoTsAT`)
-1. BIN in head
-1. BIN in tail
-1. spread ASCII in head
-1. spread ASCII in tail
+# install 
+~~~ { .bash }
+make bin
+~~~
 
-Best tatoo should be spread ASCII,
-others are more related to debug.
-Spread means bit of byte are spread on less significant bit.
+# use
 
-# development
-
-currently dev. branch are:
-- for ASCII in head/tail, [dev_text](https://gitlab.in2p3.fr/Ganil-acq/Embedded/REActif/REAction/tastout/-/tree/dev_text)
-- for BIN   in head/tail, [dev_cpp](https://gitlab.in2p3.fr/Ganil-acq/Embedded/REActif/REAction/tastout/-/tree/dev_cpp)
+~~~ { .bash }
+./tastout
+~~~
