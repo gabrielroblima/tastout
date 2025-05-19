@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 		const dataType decayTime = cimg_option("-d", samples-growTime, "Number of points of growing");
 		const dataType maxValue = cimg_option("-M", 65535, "Max value of exponential");
 		const dataType minValue = cimg_option("-m", 0, "Minimal value of exponential");
-		const bool show = cimg_option("-s", true, "Minimal value of exponential");
+		const bool show = cimg_option("-s", true, "Enables and disables display");
     
 	///standard options
 	const bool show_h = cimg_option("-h",    false,NULL);//-h hidden option
@@ -70,8 +70,8 @@ int main(int argc, char** argv)
 	if(show)
 	{	
 		//! CImg display to show curves before and after tattoo
-		cimg_library::CImgDisplay physicalCurveBefore("Physical curve before tattoo");
-		cimg_library::CImgDisplay physicalCurveAfter("Physical curve after tattoo");
+		cimg_library::CImgDisplay physicalCurveBefore(640, 480, "Physical curve before tattoo");
+		cimg_library::CImgDisplay physicalCurveAfter(640, 480, "Physical curve after tattoo");
 
 		//! Draws curves into cimgDisplay
 		rawPhysicalCurve.display_graph(physicalCurveBefore);
@@ -81,6 +81,12 @@ int main(int argc, char** argv)
 			physicalCurveBefore.wait(10);
 			physicalCurveAfter.wait(10);
 		}
+	}else
+	{
+		std::cout << "Non tattooed data" << std::endl;
+		rawPhysicalCurve.print();
+		std::cout << "Tattooed data" << std::endl;
+		physicalCurve.print();
 	}
 	#endif
 	
