@@ -7,6 +7,7 @@ Is recommended to use only integer data types in CImg (8, 16, 32 or 64 bits);
 
 # Install 
 ~~~ { .bash }
+ls ../CImg
 make bin
 ~~~
 
