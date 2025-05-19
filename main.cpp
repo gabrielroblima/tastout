@@ -24,10 +24,10 @@ int main(int argc, char** argv)
     ).c_str());//cimg_usage
     
 		const int samples = cimg_option("-n", 8192, "Number of points in graph");
-		const dataType growTime = cimg_option("-g", 4096, "Number of points of growing");
+		const dataType growTime = cimg_option("-g", samples/2, "Number of points of growing");
 		const dataType decayTime = cimg_option("-d", samples-growTime, "Number of points of growing");
-		const dataType maxValue = cimg_option("-h", 65535, "Max value of exponential");
-		const dataType minValue = cimg_option("-l", 0, "Minimal value of exponential");
+		const dataType maxValue = cimg_option("-M", 65535, "Max value of exponential");
+		const dataType minValue = cimg_option("-m", 0, "Minimal value of exponential");
 		const bool show = cimg_option("-s", true, "Minimal value of exponential");
     
 	///standard options
@@ -43,6 +43,7 @@ int main(int argc, char** argv)
 	//! Creates a Cimg object to save a physicalCurve, that's why it has only one dimension
 	cimg_library::CImg<CImg_t> physicalCurve(samples, 1, 1, 1, 0);
 	
+	srand(time(NULL));
 	//! Fills physicalCurve with a peak curve. It grows until growTime and decays until the end of physicalCurve elements
 	cimg_forX(physicalCurve, x)
 	{
@@ -60,20 +61,22 @@ int main(int argc, char** argv)
 	
 	Tastout<CImg_t, dataType> tastout;
 	
-	//! Saves curve before tattoo
-	cimg_library::CImgDisplay physicalCurveBefore;
-	physicalCurve._display_graph(physicalCurveBefore, "Physical curve before tattoo");
+	cimg_library::CImg<CImg_t> rawPhysicalCurve(samples, 1, 1, 1, 0);
+	rawPhysicalCurve = physicalCurve;
 	
 	if(tastout.write(physicalCurve.data(), physicalCurve.size(), physicalInfo, 4) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 	
-	//! Saves curve before tattoo
-	cimg_library::CImgDisplay physicalCurveAfter;
-	physicalCurve._display_graph(physicalCurveAfter, "Physical curve after tattoo");
-	
 	#if cimg_display
 	if(show)
-	{
-		while (!physicalCurveBefore.is_closed() || !physicalCurveAfter.is_closed())
+	{	
+		//! CImg display to show curves before and after tattoo
+		cimg_library::CImgDisplay physicalCurveBefore("Physical curve before tattoo");
+		cimg_library::CImgDisplay physicalCurveAfter("Physical curve after tattoo");
+
+		//! Draws curves into cimgDisplay
+		rawPhysicalCurve.display_graph(physicalCurveBefore);
+		physicalCurve.display_graph(physicalCurveAfter);
+		while (!physicalCurveBefore.is_closed() && !physicalCurveAfter.is_closed() && !physicalCurveBefore.is_keyESC() && !physicalCurveAfter.is_keyESC() && !physicalCurveBefore.is_keyQ() && !physicalCurveAfter.is_keyQ())
 		{
 			physicalCurveBefore.wait(10);
 			physicalCurveAfter.wait(10);
