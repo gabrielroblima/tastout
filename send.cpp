@@ -37,6 +37,9 @@ int main(int argc, char** argv)
   if(show_help) {/*print_help(std::cerr);*/return 0;}
   //}CLI option
 
+	//! Defines random seed
+	std::srand(time(nullptr));
+	
 	//! Initializes sender object
 	CImgSend<TData> send(address, control_port, info_port, data_port);
 
@@ -60,7 +63,7 @@ int main(int argc, char** argv)
 	//! Fill cimgList with images filled randomly
 	cimglist_for(list, i)
 	{
-		list[i].fill(std::rand() & 0xFF);
+		list[i].rand(std::rand() & 0xF, std::rand() & 0xFF);
 	}//data loop
 	
 	//! Output list to be send
@@ -78,7 +81,7 @@ int main(int argc, char** argv)
 		tattoo[1] = list[i].min();
 		
 		//! Tattoos data into CImgList in position i 	
-		if(tastout.write(list[i], list[i].size(), tattoo, 2) != TASTOUT::success) return EXIT_FAILURE;
+		if(tastout.write(list[i], list[i].size(), tattoo, 2) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 		
 		//! Send tattooed data
 		if(send.data(list[i]) == CImgTcp::sendError) return EXIT_FAILURE;
