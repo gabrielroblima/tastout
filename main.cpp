@@ -43,7 +43,12 @@ int main(int argc, char** argv)
 	//! Creates a Cimg object to save a physicalCurve, that's why it has only one dimension
 	cimg_library::CImg<CImg_t> physicalCurve(samples, 1, 1, 1, 0);
 	
+	//! Defines a seed to rand function
 	srand(time(NULL));
+	
+	//! Creates a vector to store received Data from tattoed data
+	std::vector<dataType> receivedData;
+	
 	//! Fills physicalCurve with a peak curve. It grows until growTime and decays until the end of physicalCurve elements
 	cimg_forX(physicalCurve, x)
 	{
@@ -91,11 +96,10 @@ int main(int argc, char** argv)
 	#endif
 	
 	size_t sizeOfReceivedData = 0;
-	if(tastout.read(physicalCurve.data(), physicalCurve.size(), sizeOfReceivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	if(tastout.read(physicalCurve.data(), physicalCurve.size(), receivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 	
-	const dataType* receivedData = tastout.getRead();
 	
-	for(int i = 0; i < sizeOfReceivedData; i++)
+	for(int i = 0; i < receivedData.size(); i++)
 	{
 		std::cout << "Received info = " << receivedData[i] << std::endl;
 	}
