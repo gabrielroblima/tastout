@@ -4,7 +4,7 @@
 
 #include "Tastout.hpp"
 
-#define VERSION "v0.0.1"
+#define VERSION "v0.0.2"
 
 typedef uint8_t Tammo;
 typedef uint8_t Ttarget;
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 	std::bitset<8*sizeof(Ttarget)> outputByte;
 	std::bitset<8> tattooedByte;
 	std::cout << std::endl << std::endl << "----------------- Displaying Data -----------------" << std::endl;
-	size_t startData = 8*(tastout.getMagicNumber().size()+7); // Position of first element tattooed
+	size_t startData = 8*(tastout.magicNumber_.size()+7); // Position of first element tattooed
 	
 	//! Displays data before and after tattoo
 	for(size_t i = startData; i < startData+AMMO_SIZE*8*sizeof(Tammo)*2; i+= 8)
@@ -86,16 +86,15 @@ int main(int argc, char** argv)
 	std::cout << "Max change in target data was: " << std::to_string(max) << std::endl << "Min change in target data was: " << std::to_string(min) << std::endl << std::endl;
 	
 	//! Reception of data from tattooed data
-	size_t received_size;
-	if(tastout.read(target.data(), TARGET_SIZE, received_size) != TASTOUT::SUCCESS) return EXIT_FAILURE;
-	const Tammo* received = tastout.getRead();
+	std::vector<Tammo> receivedData;
+	if(tastout.read(target.data(), TARGET_SIZE, receivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 	
 	std::cout << "These datas were read from tattooed target data: " << std::endl << std::endl;
-	for(size_t i = 0; i < received_size; i++)
+	for(size_t i = 0; i < receivedData.size(); i++)
 	{
 		std::cout << std::dec << i << ' ';
-		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(received[i]) << ' ';
-		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(received[i]) << std::endl;
+		std::cout << "0x" << std::hex << std::setfill('0') << std::setw(sizeof(Tammo)*2) << static_cast<unsigned long long>(receivedData[i]) << ' ';
+		std::cout << "0d" << std::dec << std::setw(log10((1ULL << (8*sizeof(Tammo))) - 1) + 1) << static_cast<unsigned long long>(receivedData[i]) << std::endl;
 	}
 	
 
