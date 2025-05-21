@@ -11,6 +11,8 @@
 
 #define TASTOUT_VERSION "v0.0.2"
 
+
+//! Error code class to tastout class
 enum class TASTOUT
 {
 	SUCCESS = 0,

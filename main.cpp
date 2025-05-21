@@ -46,9 +46,6 @@ int main(int argc, char** argv)
 	//! Defines a seed to rand function
 	srand(time(NULL));
 	
-	//! Creates a vector to store received Data from tattoed data
-	cimg_library::CImg<dataType> receivedData;
-	
 	//! Fills physicalCurve with a peak curve. It grows until growTime and decays until the end of physicalCurve elements
 	cimg_forX(physicalCurve, x)
 	{
@@ -75,7 +72,7 @@ int main(int argc, char** argv)
 	cimg_library::CImg<CImg_t> difference = physicalCurve;
 	
 	//! Tattoos the curve
-	if(tastout.writeCImg(physicalCurve, physicalInfo) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	if(tastout.write(physicalCurve, physicalInfo) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 	
 	//! Stores the tattooed curve 
 	gather.get_shared_row(1) =  physicalCurve;
@@ -96,8 +93,14 @@ int main(int argc, char** argv)
 	}
 	#endif
 	
-	if(tastout.readCImg(physicalCurve, receivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	//! Creates a vector to store received Data from tattoed data
+	cimg_library::CImg<dataType> receivedData;
+	
+	//! Read data in tattooed curve
+	if(tastout.read(physicalCurve, receivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 
+	//! Prints data received by tattoo in curve
+	std::cout << "Received Data" << std::endl;
 	receivedData.print();
 	
 	return EXIT_SUCCESS;
