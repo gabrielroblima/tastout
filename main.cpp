@@ -6,7 +6,7 @@
 #include "TastoutCimg.hpp"
 #include "../CImg/CImg.h"
 
-#define VERSION "v0.0.1"
+#define VERSION "v0.0.2"
 
 typedef uint16_t dataType;
 typedef uint16_t CImg_t;
