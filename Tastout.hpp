@@ -42,7 +42,7 @@ public:
 	 * 
 	 * char output represents a uint8 value
 	 **/
-	const virtual TASTOUT write(Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData)
+	const TASTOUT write(Ttarget* targetData, const size_t & sizeOfTargetData, const Tammo* ammoData, const size_t & sizeOfAmmoData)
 	{	
 		//Clear stream content
 		tastoutStream_.str("");
@@ -96,7 +96,7 @@ public:
 	 * \param sizeOfTargetData Number of elements of tattooedData
 	 * \param receivedData reference to vector of received data
 	 **/
-	TASTOUT virtual read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, std::vector<Tammo> & receivedData)
+	TASTOUT read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, std::vector<Tammo> & receivedData)
 	{		
 		if(sizeOfTattooedData < 8*magicNumber_.size())
 		{

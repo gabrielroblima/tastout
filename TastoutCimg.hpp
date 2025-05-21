@@ -21,13 +21,13 @@ public:
 	
 	TASTOUT writeCImg(cimg_library::CImg<Ttarget> & targetData, cimg_library::CImg<Tammo> & ammoData)
 	{
-		return Tastout::write(targetData.data(), targetData.size(), ammoData.data(), ammoData.size());
+		return Tastout<Ttarget, Tammo>::write(targetData.data(), targetData.size(), ammoData.data(), ammoData.size());
 	}
 	
 	TASTOUT readCImg(cimg_library::CImg<Ttarget> & tattooedData, cimg_library::CImg<Tammo> & receivedData)
 	{
 		std::vector<Tammo> receivedVector;
-		if(Tastout::read(tattooedData.data(), tattooedData.size(), receivedVector) != TASTOUT::SUCCESS) return TASTOUT::READ_FAILLURE;
+		if(Tastout<Ttarget, Tammo>::read(tattooedData.data(), tattooedData.size(), receivedVector) != TASTOUT::SUCCESS) return TASTOUT::READ_FAILLURE;
 		
 		receivedData.assign(receivedVector.data(), receivedVector.size());
 		

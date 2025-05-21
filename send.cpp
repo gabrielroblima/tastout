@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 		tattoo.fill(list[i].max(), list[i].min());
 		
 		//! Tattoos data into CImgList in position i 	
-		if(tastout.write(list[i], tattoo) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+		if(tastout.write(tattoo, tattoo) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 		
 		//! Send tattooed data
 		if(send.data(list[i]) == CImgTcp::sendError) return EXIT_FAILURE;
