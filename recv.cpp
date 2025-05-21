@@ -53,8 +53,9 @@ int main(int argc, char** argv)
 		cimglist_for(list, i)
 		{
 			if(recv.data(list[i]) == CImgTcp::receiveError) return EXIT_FAILURE;
-			if(tastout.read(list[i], ) != TASTOUT::SUCCESS) return EXIT_FAILURE;
-			tattoo = tastout.getRead();
+			
+			if(tastout.read(list[i], tattoo) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+
 			std::cout<<"receive #"<<i<<"\r" ;
 			std::cout << "Tattooed Max = " << static_cast<int>(tattoo[0]) << " Tattooed Min = " << static_cast<int>(tattoo[1]) << std::endl;
 		}//data loop
