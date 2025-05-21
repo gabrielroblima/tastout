@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "../tcp_zmq/Tcp.hpp"
-#include "Tastout.hpp"
+#include "TastoutCimg.hpp"
 
 int main(int argc, char** argv)
 {
@@ -18,11 +18,11 @@ int main(int argc, char** argv)
 	//! Initialize data object as a CImgList with at least 1 image.
 	cimg_library::CImgList<TData> list(1);
 	//! Initialize tastout instance
-	Tastout<TData, TData> tastout;
+	TastoutCimg<TData, TData> tastout;
 	unsigned iter;
 	
-	//! Pointer to tattooed received data
-	const TData* tattoo;
+	//! Cimg to store received data
+	cimg_library::CImg<TData> tattoo;
 	
 	//! Initialize variable to store number of tattooed data in CImg
 	size_t sizeOfReceivedData;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 		cimglist_for(list, i)
 		{
 			if(recv.data(list[i]) == CImgTcp::receiveError) return EXIT_FAILURE;
-			if(tastout.read(list[i], list[i].size(), sizeOfReceivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+			if(tastout.read(list[i], ) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 			tattoo = tastout.getRead();
 			std::cout<<"receive #"<<i<<"\r" ;
 			std::cout << "Tattooed Max = " << static_cast<int>(tattoo[0]) << " Tattooed Min = " << static_cast<int>(tattoo[1]) << std::endl;

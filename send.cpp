@@ -1,9 +1,9 @@
 #include <iostream>
 #include <cstdlib>
 #include "../tcp_zmq/Tcp.hpp"
-#include "Tastout.hpp"
+#include "TastoutCimg.hpp"
 
-#define VERSION "v0.0.1d"
+#define VERSION "v0.0.2d"
 
 int main(int argc, char** argv)
 {
@@ -44,10 +44,10 @@ int main(int argc, char** argv)
 	CImgSend<TData> send(address, control_port, info_port, data_port);
 
 	//! Initializes tastout object
-	Tastout<TData, TData> tastout;
+	TastoutCimg<TData, TData> tastout;
 	
-	//! Initializes vector to be tattooed (we'll send only max and min values)
-	TData tattoo[2]; 
+	//! Initializes CImg to be tattooed (we'll send only max and min values)
+	cimg_library::CImg<TData> tattoo(2); 
 	
 	//! if requested by CLI option, send a stop signal and exit
 	if(stop)
@@ -77,11 +77,10 @@ int main(int argc, char** argv)
 	cimglist_for(list, i)
 	{	
 		//! Saves list min and max value into data vector 
-		tattoo[0] = list[i].max();
-		tattoo[1] = list[i].min();
+		tattoo.fill(list[i].max(), list[i].min());
 		
 		//! Tattoos data into CImgList in position i 	
-		if(tastout.write(list[i], list[i].size(), tattoo, 2) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+		if(tastout.write(list[i], tattoo) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 		
 		//! Send tattooed data
 		if(send.data(list[i]) == CImgTcp::sendError) return EXIT_FAILURE;
