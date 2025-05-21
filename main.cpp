@@ -3,7 +3,6 @@
 #include <cmath>
 #include <algorithm>
 
-#include "Tastout.hpp"
 #include "TastoutCimg.hpp"
 #include "../CImg/CImg.h"
 
@@ -48,7 +47,7 @@ int main(int argc, char** argv)
 	srand(time(NULL));
 	
 	//! Creates a vector to store received Data from tattoed data
-	std::vector<dataType> receivedData;
+	cimg_library::CImg<dataType> receivedData;
 	
 	//! Fills physicalCurve with a peak curve. It grows until growTime and decays until the end of physicalCurve elements
 	cimg_forX(physicalCurve, x)
@@ -63,9 +62,10 @@ int main(int argc, char** argv)
 	}
 
 	//! Data to be tattooed in graph
-	dataType physicalInfo[] = {growTime, decayTime, maxValue, minValue};
+	cimg_library::CImg<dataType> physicalInfo(4);
+	physicalInfo.fill(growTime, decayTime, maxValue, minValue);
 	
-	Tastout<CImg_t, dataType> tastout;
+	TastoutCimg<CImg_t, dataType> tastout;
 	
 	//! Initializes CImg to store curves
 	cimg_library::CImg<CImg_t> gather(samples, 2);
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 	cimg_library::CImg<CImg_t> difference = physicalCurve;
 	
 	//! Tattoos the curve
-	if(tastout.write(physicalCurve.data(), physicalCurve.size(), physicalInfo, 4) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	if(tastout.writeCImg(physicalCurve, physicalInfo) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 	
 	//! Stores the tattooed curve 
 	gather.get_shared_row(1) =  physicalCurve;
@@ -96,12 +96,9 @@ int main(int argc, char** argv)
 	}
 	#endif
 	
-	if(tastout.read(physicalCurve.data(), physicalCurve.size(), receivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	if(tastout.readCImg(physicalCurve, receivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
 
-		std::cout << "Received rising time = " << receivedData[0] << std::endl;
-		std::cout << "Received falling time = " << receivedData[1] << std::endl;
-		std::cout << "Received max value = " << receivedData[2] << std::endl;
-		std::cout << "Received min value = " << receivedData[3] << std::endl;
+	receivedData.print();
 	
 	return EXIT_SUCCESS;
 }

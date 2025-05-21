@@ -4,6 +4,8 @@
 #include "Tastout.hpp"
 #include "../CImg/CImg.h"
 
+#define TASTOUT_CIMG_VERSION "v0.0.1"
+
 /**
  * Class Tastout to work directly with CImg objects;
  **/
@@ -16,24 +18,25 @@ public:
 	//! TastoutCimg constructor calls Tastout constructor
 	TastoutCimg() : Tastout<Ttarget, Tammo>(){}
 	
-	TASTOUT write(cimg_library::CImg<Ttarget> & targetData, cimg_library::CImg<Tammo> & ammoData)
+	
+	TASTOUT writeCImg(cimg_library::CImg<Ttarget> & targetData, cimg_library::CImg<Tammo> & ammoData)
 	{
-		return write(targetData.data(), targetData.size(), ammoData.data(), ammoData.size());
+		return this->write(targetData.data(), targetData.size(), ammoData.data(), ammoData.size());
 	}
 	
-	TASTOUT read(cimg_library::CImg<Ttarget> & tattooedData, cimg_library::CImg<Tammo> & receivedData)
+	TASTOUT readCImg(cimg_library::CImg<Ttarget> & tattooedData, cimg_library::CImg<Tammo> & receivedData)
 	{
 		std::vector<Tammo> receivedVector;
-		if(read(tattooedData.data(), tattooedData.size(), receivedVector) != TASTOUT::SUCCESS) return TASTOUT::READ_FAILLURE;
+		if(this->read(tattooedData.data(), tattooedData.size(), receivedVector) != TASTOUT::SUCCESS) return TASTOUT::READ_FAILLURE;
 		
 		receivedData.assign(receivedVector.size());
 		
 		memcpy(receivedData.data(), receivedVector.data(), receivedVector.size()*sizeof(Tammo));
 		
 		return TASTOUT::SUCCESS;
-	}	
-	
+	}
 
+	
 };
 
 
