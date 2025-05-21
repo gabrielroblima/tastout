@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "Tastout.hpp"
+#include "TastoutCimg.hpp"
 #include "../CImg/CImg.h"
 
 #define VERSION "v0.0.1"
@@ -41,7 +42,7 @@ int main(int argc, char** argv)
 	//}CLI option
 	
 	//! Creates a Cimg object to save a physicalCurve, that's why it has only one dimension
-	cimg_library::CImg<CImg_t> physicalCurve(samples, 1, 1, 1, 0);
+	cimg_library::CImg<CImg_t> physicalCurve(samples);
 	
 	//! Defines a seed to rand function
 	srand(time(NULL));
@@ -66,43 +67,41 @@ int main(int argc, char** argv)
 	
 	Tastout<CImg_t, dataType> tastout;
 	
-	cimg_library::CImg<CImg_t> rawPhysicalCurve(samples, 1, 1, 1, 0);
-	rawPhysicalCurve = physicalCurve;
+	//! Initializes CImg to store curves
+	cimg_library::CImg<CImg_t> gather(samples, 2);
 	
+	//! Stores the curve without tattoo
+	gather.get_shared_row(0) = physicalCurve;
+	cimg_library::CImg<CImg_t> difference = physicalCurve;
+	
+	//! Tattoos the curve
 	if(tastout.write(physicalCurve.data(), physicalCurve.size(), physicalInfo, 4) != TASTOUT::SUCCESS) return EXIT_FAILURE;
+	
+	//! Stores the tattooed curve 
+	gather.get_shared_row(1) =  physicalCurve;
+	difference = physicalCurve - difference; 
 	
 	#if cimg_display
 	if(show)
 	{	
-		//! CImg display to show curves before and after tattoo
-		cimg_library::CImgDisplay physicalCurveBefore(640, 480, "Physical curve before tattoo");
-		cimg_library::CImgDisplay physicalCurveAfter(640, 480, "Physical curve after tattoo");
-
-		//! Draws curves into cimgDisplay
-		rawPhysicalCurve.display_graph(physicalCurveBefore);
-		physicalCurve.display_graph(physicalCurveAfter);
-		while (!physicalCurveBefore.is_closed() && !physicalCurveAfter.is_closed() && !physicalCurveBefore.is_keyESC() && !physicalCurveAfter.is_keyESC() && !physicalCurveBefore.is_keyQ() && !physicalCurveAfter.is_keyQ())
-		{
-			physicalCurveBefore.wait(10);
-			physicalCurveAfter.wait(10);
-		}
+		//! Note: most of differences between before and after tattooing signals are going to be in the first elements of CImg
+		gather.transpose().display_graph("Superposed before and after tattooing signals", 1, 1);
+		difference.display_graph("Difference between before and after tattooing signals");
 	}else
 	{
 		std::cout << "Non tattooed data" << std::endl;
-		rawPhysicalCurve.print();
+		gather.get_shared_row(0).print();
 		std::cout << "Tattooed data" << std::endl;
-		physicalCurve.print();
+		gather.get_shared_row(1).print();
 	}
 	#endif
 	
-	size_t sizeOfReceivedData = 0;
 	if(tastout.read(physicalCurve.data(), physicalCurve.size(), receivedData) != TASTOUT::SUCCESS) return EXIT_FAILURE;
-	
-	
-	for(int i = 0; i < receivedData.size(); i++)
-	{
-		std::cout << "Received info = " << receivedData[i] << std::endl;
-	}
+
+		std::cout << "Received rising time = " << receivedData[0] << std::endl;
+		std::cout << "Received falling time = " << receivedData[1] << std::endl;
+		std::cout << "Received max value = " << receivedData[2] << std::endl;
+		std::cout << "Received min value = " << receivedData[3] << std::endl;
 	
 	return EXIT_SUCCESS;
 }

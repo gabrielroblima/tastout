@@ -17,7 +17,8 @@ enum class TASTOUT
 	WRONG_SIZE,
 	MAGIC_NUMBER_IDENTIFICATION_FAILURE, 
 	WRONG_MAGIC_NUMBER_SIZE,
-	INCOMPATIBLE_TYPE_SIZE	
+	INCOMPATIBLE_TYPE_SIZE,
+	READ_FAILLURE	
 };
 
 template<typename Ttarget, typename Tammo>
@@ -26,7 +27,7 @@ class Tastout
 public:
 	
 	//! Constructor
-	Tastout() : magicNumber_("TAsTout"), className_("Class::Tastout")
+	Tastout() : magicNumber_("TAsTout")
 	{
 		//! Creates a magic number with version number
 		magicNumber_ = magicNumber_ + TASTOUT_VERSION;		
@@ -93,8 +94,7 @@ public:
 	/**
 	 * \param tattooedData Pointer to data that received the tattoo 
 	 * \param sizeOfTargetData Number of elements of tattooedData
-	 * \param receivedData Pointer to received data "vector"
-	 * \param sizeOfAmmoData Number of received elements
+	 * \param receivedData reference to vector of received data
 	 **/
 	TASTOUT read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, std::vector<Tammo> & receivedData)
 	{		
