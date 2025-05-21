@@ -9,7 +9,7 @@
 #include <vector>
 #include <cstring>
 
-#define TASTOUT_VERSION "v0.0.1"
+#define TASTOUT_VERSION "v0.0.2"
 
 enum class TASTOUT
 {
@@ -17,7 +17,8 @@ enum class TASTOUT
 	WRONG_SIZE,
 	MAGIC_NUMBER_IDENTIFICATION_FAILURE, 
 	WRONG_MAGIC_NUMBER_SIZE,
-	INCOMPATIBLE_TYPE_SIZE	
+	INCOMPATIBLE_TYPE_SIZE,
+	READ_FAILLURE	
 };
 
 template<typename Ttarget, typename Tammo>
@@ -26,14 +27,11 @@ class Tastout
 public:
 	
 	//! Constructor
-	Tastout() : magicNumber_("TAsTout"), className_("Class::Tastout")
+	Tastout() : magicNumber_("TAsTout")
 	{
 		//! Creates a magic number with version number
 		magicNumber_ = magicNumber_ + TASTOUT_VERSION;		
 	}
-	
-	//! Magic number is based on version, so user can get magic number by this function
-	const std::string & getMagicNumber(){return magicNumber_;};
 	
 	/**
 	 * \param targetData Pointer to data that will receive the tattoo 
@@ -96,10 +94,9 @@ public:
 	/**
 	 * \param tattooedData Pointer to data that received the tattoo 
 	 * \param sizeOfTargetData Number of elements of tattooedData
-	 * \param receivedData Pointer to received data "vector"
-	 * \param sizeOfAmmoData Number of received elements
+	 * \param receivedData reference to vector of received data
 	 **/
-	TASTOUT read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, size_t & sizeOfReceivedData)
+	TASTOUT read(Ttarget* tattooedData, const size_t & sizeOfTattooedData, std::vector<Tammo> & receivedData)
 	{		
 		if(sizeOfTattooedData < 8*magicNumber_.size())
 		{
@@ -132,7 +129,7 @@ public:
 		
 		//! Gets information about number of bits and number of elements received
 		size_t receivedNumberOfBits = std::stoi(informationRead.substr(magicNumber_.size()+1,2), nullptr, 16);
-		sizeOfReceivedData = std::stoi(informationRead.substr(magicNumber_.size()+4,2), nullptr, 16);
+		size_t sizeOfReceivedData = std::stoi(informationRead.substr(magicNumber_.size()+4,2), nullptr, 16);
 		
 		if(8*sizeof(Tammo) != receivedNumberOfBits)
 		{
@@ -141,8 +138,8 @@ public:
 		}
 		
 		//! Allocates memory to store received data.
-		receivedDataVector.reserve(sizeOfReceivedData);
-		receivedDataVector.resize(sizeOfReceivedData); 
+		receivedData.reserve(sizeOfReceivedData);
+		receivedData.resize(sizeOfReceivedData); 
 		
 		//! Continues to Read data 
 		std::string dataString("");
@@ -161,23 +158,13 @@ public:
 		//! Converts all received data from string int values
 		for(size_t i = 0; i < dataString.size(); i+=receivedNumberOfBits/4)
 		{
-			receivedDataVector[i/(receivedNumberOfBits/4)] = std::stoi(dataString.substr(i,receivedNumberOfBits/4), nullptr, 16);
-		}		
+			receivedData[i/(receivedNumberOfBits/4)] = std::stoi(dataString.substr(i,receivedNumberOfBits/4), nullptr, 16);
+		}
 		return TASTOUT::SUCCESS;
 	}
-	
-	//! Returns pointer to receivedDataVector
-	const Tammo* getRead()
-	{
-		return receivedDataVector.data();
-	}
-
-private:
-	
+		
 	std::string magicNumber_; //! MagicNumber => Includes Tastout version
 	std::stringstream tastoutStream_; //! Stream to be tattooed
-	std::string className_; //! Debug Info
-	std::vector<Tammo> receivedDataVector; //! Vector to store read data after execution of read method 
 	
 };
 #endif
