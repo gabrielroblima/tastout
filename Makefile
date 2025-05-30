@@ -1,5 +1,5 @@
 BIN = tastout
-FLAGS = -std=c++17 -lX11
+FLAGS = -std=c++17 -lX11 -lpthread
 all: bin run
 
 bin:
