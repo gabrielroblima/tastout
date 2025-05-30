@@ -1,6 +1,6 @@
 BIN_SEND = send
 BIN_RECV = recv
-FLAGS = -std=c++17 -lX11 -lzmq
+FLAGS = -std=c++17 -lX11 -lzmq -lpthread
 all: bin run
 
 bin:
