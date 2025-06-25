@@ -5,6 +5,13 @@ This project is a part of a bigger development made during my 2nd year of engine
 The name Tastout came from French "T'as tout" or "Tu as tout" a way to say you have everything, it is also a pun with the word tattoo (which has the same sound) giving the idea of tattooing information into a signal.
 I'd like to thank my internship tutor, M. Sébastien COUDERT, by the opportunity and give him the credits for this idea. 
 
+## Branches
+
+While this project was being developed, some branches were created to tattoo a vector or a CImg type, for example.
+- [spread_vector](https://github.com/gabrielroblima/tastout/tree/spread_cimg): Is capable of tattooing data into a vector
+- [spread_cimg](https://github.com/gabrielroblima/tastout/tree/spread_vector): Is capable of tattoing data into a CImg type.
+- The other branches still in development, and [dev_spread_cimg_tcp](https://github.com/gabrielroblima/tastout/tree/dev_spread_cimg_tcp) can send tattooed signals by tcp, but needs another library (that's not yet available).
+
 
 # How to build the project
 
@@ -29,8 +36,8 @@ Imagine you have a noisy digital signal. What happens if you change only the lea
 |   0     |       173        |     10101101     |       10101100         |     0     |                 |
 |   1     |        64        |     01000000     |       01000000         |     0     |                 |
 |   2     |       255        |     11111111     |       11111111         |     1     |                 |
-|   3     |        34        |     00100010     |       00100011         |     1     |                 |
-|   4     |        89        |     01011001     |       01011000         |     0     |       **3**     |
+|   3     |        34        |     00100010     |       00100011         |     1     |       **3**     |
+|   4     |        89        |     01011001     |       01011000         |     0     |                 |
 |   5     |       120        |     01111000     |       01111000         |     0     |                 |
 |   6     |         3        |     00000011     |       00000011         |     1     |                 |
 |   7     |       202        |     11001010     |       11001011         |     1     |                 |
