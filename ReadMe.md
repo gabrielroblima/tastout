@@ -8,8 +8,8 @@ I'd like to thank my internship tutor, M. Sébastien COUDERT, by the opportunity
 ## Branches
 
 While this project was being developed, some branches were created to tattoo a vector or a CImg type, for example.
-- [spread_vector](https://github.com/gabrielroblima/tastout/tree/spread_cimg): Is capable of tattooing data into a vector
-- [spread_cimg](https://github.com/gabrielroblima/tastout/tree/spread_vector): Is capable of tattoing data into a CImg type.
+- [spread_vector](https://github.com/gabrielroblima/tastout/tree/spread_cimg) is capable of tattooing data into a vector
+- [spread_cimg](https://github.com/gabrielroblima/tastout/tree/spread_vector) is capable of tattoing data into a CImg type.
 - The other branches still in development, and [dev_spread_cimg_tcp](https://github.com/gabrielroblima/tastout/tree/dev_spread_cimg_tcp) can send tattooed signals by tcp, but needs another library (that's not yet available).
 
 
